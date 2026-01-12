@@ -70,11 +70,17 @@ WSGI_APPLICATION = 'healthy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# 自动检测环境：如果在 Docker 容器中，默认使用 mysql，否则使用 localhost
+# 自动检测环境：如果在 Docker 容器中，默认使用 mysql，否则使用 127.0.0.1
+# 注意：使用 127.0.0.1 而不是 localhost，因为 localhost 会尝试使用 Unix socket
 DB_HOST = os.getenv('DB_HOST')
 if not DB_HOST:
     # 检查是否在 Docker 容器中（通过检查 /.dockerenv 文件）
-    DB_HOST = 'mysql' if os.path.exists('/.dockerenv') else 'localhost'
+    DB_HOST = 'mysql' if os.path.exists('/.dockerenv') else '127.0.0.1'
+
+# 本地开发时 MySQL 运行在 3007 端口，Docker 容器内使用 3306
+DB_PORT = os.getenv('DB_PORT')
+if not DB_PORT:
+    DB_PORT = '3007' if not os.path.exists('/.dockerenv') else '3306'
 
 DATABASES = {
     'default': {
@@ -83,7 +89,7 @@ DATABASES = {
         'USER': os.getenv('DB_USER', 'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'password'),
         'HOST': DB_HOST,
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'PORT': DB_PORT,
     }
 }
 

@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: healthy-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: healthy
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_NAME:-healthy}
     ports:
-      - "3007:3306"
+      - "${DB_PORT:-3007}:3306"
     volumes:
       - mysql_dev_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-password}"]
       interval: 5s
       timeout: 3s
       retries: 10

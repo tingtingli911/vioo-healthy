@@ -132,16 +132,63 @@ healthy/
 
 ## 环境变量配置
 
-### 服务器部署
+### 配置管理说明
 
-创建 `.env` 文件（可选）：
+项目使用 `.env` 文件统一管理环境变量，所有敏感信息（数据库密码、密钥等）都通过环境变量配置。
+
+#### 首次使用
+
+1. **复制配置模板**：
+```bash
+cp .env.example .env
+```
+
+2. **编辑 `.env` 文件**，根据你的需求修改配置：
 ```env
+# 数据库配置
 DB_NAME=healthy
-DB_PASSWORD=your-secure-password
+DB_USER=root
+DB_PASSWORD=your-password-here
+DB_HOST=127.0.0.1
+DB_PORT=3007
+
+# Django 配置
 SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Docker 镜像标签（部署时使用）
 BACKEND_IMAGE=healthy-backend:latest
 FRONTEND_IMAGE=healthy-frontend:latest
 ```
+
+#### 配置存储位置
+
+- **本地开发**：
+  - MySQL 配置：`.env` 文件 → `docker-compose.yml` → MySQL 容器
+  - Django 配置：`.env` 文件 → `dev.sh` 脚本 → Django 进程
+  - 如果不存在 `.env` 文件，使用默认值（见下方）
+
+- **服务器部署**：
+  - 所有配置：`.env` 文件 → `docker-compose.deploy.yml` → 各个容器
+  - Docker Compose 会自动读取 `.env` 文件中的环境变量
+
+#### 默认配置（无 .env 文件时）
+
+**本地开发**：
+- `DB_NAME=healthy`
+- `DB_USER=root`
+- `DB_PASSWORD=password`
+- `DB_HOST=127.0.0.1`
+- `DB_PORT=3007`
+
+**服务器部署**：
+- `DB_NAME=healthy`
+- `DB_PASSWORD=password`
+- `SECRET_KEY=django-insecure-change-this-in-production`
+- `BACKEND_IMAGE=healthy-backend:latest`
+- `FRONTEND_IMAGE=healthy-frontend:latest`
+
+⚠️ **重要**：`.env` 文件包含敏感信息，已添加到 `.gitignore`，**不要提交到 Git**！
 
 ## 注意事项
 

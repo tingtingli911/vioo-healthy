@@ -4,6 +4,22 @@ set -e
 
 echo "🚀 启动本地开发环境..."
 
+# 加载环境变量（如果存在 .env 文件）
+if [ -f .env ]; then
+    echo "📝 加载 .env 文件..."
+    export $(cat .env | grep -v '^#' | xargs)
+else
+    echo "⚠️  未找到 .env 文件，使用默认配置"
+    echo "   提示：可以复制 .env.example 创建 .env 文件来自定义配置"
+fi
+
+# 设置默认值（如果环境变量未设置）
+export DB_NAME=${DB_NAME:-healthy}
+export DB_USER=${DB_USER:-root}
+export DB_PASSWORD=${DB_PASSWORD:-password}
+export DB_HOST=${DB_HOST:-127.0.0.1}
+export DB_PORT=${DB_PORT:-3007}
+
 # 检查 Docker 是否运行
 if ! docker info > /dev/null 2>&1; then
     echo "❌ Docker 未运行，请先启动 Docker"
@@ -16,7 +32,7 @@ docker-compose up -d mysql
 
 # 等待 MySQL 就绪
 echo "⏳ 等待 MySQL 就绪..."
-until docker-compose exec -T mysql mysqladmin ping -h localhost -uroot -ppassword --silent 2>/dev/null; do
+until docker-compose exec -T mysql mysqladmin ping -h localhost -u${DB_USER} -p${DB_PASSWORD} --silent 2>/dev/null; do
     echo "   等待中..."
     sleep 2
 done
@@ -66,7 +82,7 @@ echo $FRONTEND_PID > .dev.pids
 # 启动后端开发服务器
 echo "🚀 启动后端开发服务器（端口 3009）..."
 cd backend
-# 直接使用虚拟环境中的 python
+# 直接使用虚拟环境中的 python（环境变量已在脚本开头设置）
 ./venv/bin/python manage.py runserver 0.0.0.0:3009 > ../.backend.log 2>&1 &
 BACKEND_PID=$!
 cd ..
