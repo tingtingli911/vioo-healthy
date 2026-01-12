@@ -6,10 +6,12 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 加载 .env 文件（从项目根目录，即 backend 的上一级目录）
+PROJECT_ROOT = BASE_DIR.parent
+load_dotenv(PROJECT_ROOT / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -53,7 +55,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
-        'options': {
+        'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
