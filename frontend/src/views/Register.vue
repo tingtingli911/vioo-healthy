@@ -180,7 +180,6 @@ export default {
   font-weight: 300;
   color: white;
   letter-spacing: 8px;
-  text-transform: lowercase;
 }
 
 .register-card {
