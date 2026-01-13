@@ -1,0 +1,17 @@
+/* Element Plus 主题色定制 */
+:root {
+  --el-color-primary: #7429ec;
+  --el-color-primary-light-3: #9d5ef0;
+  --el-color-primary-light-5: #b88af3;
+  --el-color-primary-light-7: #d3b5f6;
+  --el-color-primary-light-8: #e0c8f8;
+  --el-color-primary-light-9: #eddcfb;
+  --el-color-primary-dark-2: #5d1fb9;
+}
+
+/* 全局样式变量 */
+:root {
+  --theme-primary: #7429ec;
+  --theme-gradient-start: #7429ec;
+  --theme-gradient-end: #9d5ef0;
+}
