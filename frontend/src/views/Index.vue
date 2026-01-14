@@ -23,19 +23,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
 import HomePage from '@/components/pages/HomePage.vue'
 import DashboardPage from '@/components/pages/DashboardPage.vue'
 import ModulePage from '@/components/pages/ModulePage.vue'
 
 const router = useRouter()
+const route = useRoute()
 const isLoggedIn = ref(false)
 const activeTab = ref('dashboard')
 
+// 根据路由路径设置 activeTab
+const setActiveTabFromRoute = () => {
+  const path = route.path
+  if (path === '/') {
+    activeTab.value = 'dashboard'
+  } else if (path === '/weight') {
+    activeTab.value = 'weight'
+  } else if (path === '/glucose') {
+    activeTab.value = 'glucose'
+  } else if (path === '/ai') {
+    activeTab.value = 'ai'
+  } else if (path === '/report') {
+    activeTab.value = 'report'
+  } else {
+    activeTab.value = 'dashboard'
+  }
+}
+
 const handleNavigate = (tab) => {
-  activeTab.value = tab
+  // 根据 tab 跳转到对应路由
+  const routeMap = {
+    'dashboard': '/',
+    'weight': '/weight',
+    'glucose': '/glucose',
+    'ai': '/ai',
+    'report': '/report'
+  }
+  const targetPath = routeMap[tab] || '/'
+  router.push(targetPath)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -44,7 +72,7 @@ const handleLogin = () => {
   const token = localStorage.getItem('token')
   if (token) {
     isLoggedIn.value = true
-    activeTab.value = 'dashboard'
+    setActiveTabFromRoute()
   } else {
     router.push('/login')
   }
@@ -53,17 +81,24 @@ const handleLogin = () => {
 const handleLogout = () => {
   localStorage.removeItem('token')
   isLoggedIn.value = false
-  activeTab.value = 'home'
+  activeTab.value = 'dashboard'
   // 退出后回到首页，显示首页内容
   router.push('/')
 }
+
+// 监听路由变化
+watch(() => route.path, () => {
+  if (isLoggedIn.value) {
+    setActiveTabFromRoute()
+  }
+})
 
 onMounted(() => {
   // 检查登录状态
   const token = localStorage.getItem('token')
   if (token) {
     isLoggedIn.value = true
-    activeTab.value = 'dashboard'
+    setActiveTabFromRoute()
   }
 })
 </script>

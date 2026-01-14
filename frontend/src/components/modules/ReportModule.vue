@@ -98,7 +98,7 @@ const showUploadDialog = ref(false)
 const reports = [
   {
     id: 1,
-    date: "2024年12月15日",
+    date: "2026年12月15日",
     hospital: "北京协和医院",
     type: "年度体检",
     status: "已分析",
@@ -107,7 +107,7 @@ const reports = [
   },
   {
     id: 2,
-    date: "2024年6月20日",
+    date: "2026年6月20日",
     hospital: "北京大学第一医院",
     type: "专项检查",
     status: "已分析",

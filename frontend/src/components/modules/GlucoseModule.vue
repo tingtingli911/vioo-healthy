@@ -55,59 +55,64 @@
     <div class="health-card">
       <h3 class="text-sm font-medium text-foreground mb-4">今日血糖曲线</h3>
       <div class="h-52">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart :data="glucoseData">
-            <defs>
-              <linearGradient id="glucoseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0.3"/>
-                <stop offset="95%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-            <XAxis 
-              dataKey="time" 
-              :axisLine="false"
-              :tickLine="false"
-              :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
-            />
-            <YAxis 
-              :domain="[4, 12]"
-              :axisLine="false"
-              :tickLine="false"
-              :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
-              :width="30"
-            />
-            <Tooltip 
-              :contentStyle="{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '12px',
-                fontSize: '12px',
-              }"
-              :formatter="(value) => [`${value} mmol/L`, '血糖']"
-            />
-            <ReferenceLine 
-              :y="7.8" 
-              :stroke="'hsl(var(--health-glucose))'" 
-              strokeDasharray="3 3" 
-              :strokeOpacity="0.5"
-            />
-            <ReferenceLine 
-              :y="6.1" 
-              :stroke="'hsl(var(--health-ai))'" 
-              strokeDasharray="3 3" 
-              :strokeOpacity="0.5"
-            />
-            <Area 
-              type="monotone" 
-              dataKey="value" 
-              :stroke="'hsl(var(--health-glucose))'"
-              :strokeWidth="2.5"
-              fill="url(#glucoseGradient)"
-              :dot="{ fill: 'hsl(var(--health-glucose))', strokeWidth: 0, r: 4 }"
-              :activeDot="{ r: 6, fill: 'hsl(var(--health-glucose))' }"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <template v-if="isMounted">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart :data="glucoseData">
+              <defs>
+                <linearGradient id="glucoseGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0.3"/>
+                  <stop offset="95%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="time" 
+                :axisLine="false"
+                :tickLine="false"
+                :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
+              />
+              <YAxis 
+                :domain="[4, 12]"
+                :axisLine="false"
+                :tickLine="false"
+                :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
+                :width="30"
+              />
+              <Tooltip 
+                :contentStyle="{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                }"
+                :formatter="(value) => [`${value} mmol/L`, '血糖']"
+              />
+              <ReferenceLine 
+                :y="7.8" 
+                :stroke="'hsl(var(--health-glucose))'" 
+                strokeDasharray="3 3" 
+                :strokeOpacity="0.5"
+              />
+              <ReferenceLine 
+                :y="6.1" 
+                :stroke="'hsl(var(--health-ai))'" 
+                strokeDasharray="3 3" 
+                :strokeOpacity="0.5"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                :stroke="'hsl(var(--health-glucose))'"
+                :strokeWidth="2.5"
+                fill="url(#glucoseGradient)"
+                :dot="{ fill: 'hsl(var(--health-glucose))', strokeWidth: 0, r: 4 }"
+                :activeDot="{ r: 6, fill: 'hsl(var(--health-glucose))' }"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </template>
+        <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+          加载中...
+        </div>
       </div>
       <div class="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
         <div class="flex items-center gap-1">
@@ -148,12 +153,51 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, nextTick, defineAsyncComponent } from 'vue'
 import { Plus, Droplets, Clock } from 'lucide-vue-next'
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, ReferenceLine } from 'recharts'
 import Button from '@/components/ui/Button.vue'
 
 const showAddDialog = ref(false)
+const isMounted = ref(false)
+
+// 动态导入 recharts 组件
+const AreaChart = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.AreaChart
+})
+const Area = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.Area
+})
+const XAxis = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.XAxis
+})
+const YAxis = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.YAxis
+})
+const ResponsiveContainer = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.ResponsiveContainer
+})
+const Tooltip = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.Tooltip
+})
+const ReferenceLine = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.ReferenceLine
+})
+
+onMounted(async () => {
+  await nextTick()
+  // 延迟确保 DOM 完全渲染
+  await new Promise(resolve => setTimeout(resolve, 200))
+  requestAnimationFrame(() => {
+    isMounted.value = true
+  })
+})
 
 const glucoseData = [
   { time: "6:00", value: 5.2, type: "空腹" },

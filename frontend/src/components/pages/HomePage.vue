@@ -133,7 +133,7 @@
           <span class="font-bold gradient-text">vioo</span>
         </div>
         <p class="text-sm text-muted-foreground">
-          © 2024 vioo. 您的智能健康管理助手
+          © 2026 vioo. 您的智能健康管理助手
         </p>
       </div>
     </footer>

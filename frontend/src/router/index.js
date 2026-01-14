@@ -18,6 +18,30 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register
+  },
+  {
+    path: '/weight',
+    name: 'Weight',
+    component: Index,
+    meta: { moduleId: 'weight' }
+  },
+  {
+    path: '/glucose',
+    name: 'Glucose',
+    component: Index,
+    meta: { moduleId: 'glucose' }
+  },
+  {
+    path: '/ai',
+    name: 'AI',
+    component: Index,
+    meta: { moduleId: 'ai' }
+  },
+  {
+    path: '/report',
+    name: 'Report',
+    component: Index,
+    meta: { moduleId: 'report' }
   }
 ]
 
@@ -31,12 +55,16 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const publicPages = ['/', '/login', '/register']
   const isPublicPage = publicPages.includes(to.path)
+  const protectedPages = ['/weight', '/glucose', '/ai', '/report']
 
   if (token && (to.path === '/login' || to.path === '/register')) {
     // 已登录但访问登录/注册页，跳转到首页
     next('/')
+  } else if (!token && protectedPages.includes(to.path)) {
+    // 未登录访问受保护页面，跳转到登录页
+    next('/login')
   } else {
-    // 允许访问公开页面（包括首页），其他页面需要登录
+    // 允许访问
     next()
   }
 })

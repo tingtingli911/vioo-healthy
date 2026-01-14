@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen pt-20">
+  <div class="min-h-screen">
     <!-- Header -->
     <div :class="[
       'bg-gradient-to-b py-16 px-6',

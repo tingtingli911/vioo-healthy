@@ -1,7 +1,7 @@
 <template>
   <div class="register-container">
     <div class="brand-header">
-      <div class="brand">VIOO</div>
+      <router-link to="/" class="brand">VIOO</router-link>
     </div>
     <el-card class="register-card" shadow="hover">
       <el-form
@@ -167,7 +167,7 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-gradient-end) 100%);
+  background: hsl(var(--background));
   padding: 20px;
 }
 
@@ -177,14 +177,28 @@ export default {
 
 .brand {
   font-size: 36px;
-  font-weight: 300;
-  color: white;
+  font-weight: 600;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.brand:hover {
+  transform: scale(1.05);
 }
 
 .register-card {
   width: 100%;
   max-width: 400px;
+  border-radius: 1.5rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .register-card :deep(.el-card__body) {
@@ -197,12 +211,12 @@ export default {
 
 .link-text {
   text-align: center;
-  color: #666;
+  color: hsl(var(--muted-foreground));
   font-size: 14px;
 }
 
 .link-text a {
-  color: var(--el-color-primary);
+  color: hsl(var(--primary));
   text-decoration: none;
   font-weight: 500;
   margin-left: 5px;

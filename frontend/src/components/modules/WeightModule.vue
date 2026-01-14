@@ -32,40 +32,45 @@
     <div class="health-card">
       <h3 class="text-sm font-medium text-foreground mb-4">近7天趋势</h3>
       <div class="h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart :data="weightData">
-            <XAxis 
-              dataKey="date" 
-              :axisLine="false"
-              :tickLine="false"
-              :tick="{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }"
-            />
-            <YAxis 
-              :domain="['dataMin - 0.5', 'dataMax + 0.5']"
-              :axisLine="false"
-              :tickLine="false"
-              :tick="{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }"
-              :width="35"
-            />
-            <Tooltip 
-              :contentStyle="{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '12px',
-                fontSize: '12px',
-              }"
-              :formatter="(value) => [`${value} kg`, '体重']"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="weight" 
-              :stroke="'hsl(var(--health-weight))'"
-              :strokeWidth="2.5"
-              :dot="{ fill: 'hsl(var(--health-weight))', strokeWidth: 0, r: 4 }"
-              :activeDot="{ r: 6, fill: 'hsl(var(--health-weight))' }"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <template v-if="isMounted">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart :data="weightData">
+              <XAxis 
+                dataKey="date" 
+                :axisLine="false"
+                :tickLine="false"
+                :tick="{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }"
+              />
+              <YAxis 
+                :domain="['dataMin - 0.5', 'dataMax + 0.5']"
+                :axisLine="false"
+                :tickLine="false"
+                :tick="{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }"
+                :width="35"
+              />
+              <Tooltip 
+                :contentStyle="{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                }"
+                :formatter="(value) => [`${value} kg`, '体重']"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="weight" 
+                :stroke="'hsl(var(--health-weight))'"
+                :strokeWidth="2.5"
+                :dot="{ fill: 'hsl(var(--health-weight))', strokeWidth: 0, r: 4 }"
+                :activeDot="{ r: 6, fill: 'hsl(var(--health-weight))' }"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </template>
+        <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+          加载中...
+        </div>
       </div>
     </div>
 
@@ -87,12 +92,47 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, nextTick, defineAsyncComponent } from 'vue'
 import { Plus, TrendingDown, Target, Calendar } from 'lucide-vue-next'
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
 import Button from '@/components/ui/Button.vue'
 
 const showAddDialog = ref(false)
+const isMounted = ref(false)
+
+// 动态导入 recharts 组件
+const LineChart = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.LineChart
+})
+const Line = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.Line
+})
+const XAxis = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.XAxis
+})
+const YAxis = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.YAxis
+})
+const ResponsiveContainer = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.ResponsiveContainer
+})
+const Tooltip = defineAsyncComponent(async () => {
+  const recharts = await import('recharts')
+  return recharts.Tooltip
+})
+
+onMounted(async () => {
+  await nextTick()
+  // 延迟确保 DOM 完全渲染
+  await new Promise(resolve => setTimeout(resolve, 200))
+  requestAnimationFrame(() => {
+    isMounted.value = true
+  })
+})
 
 const weightData = [
   { date: "1/7", weight: 68.5 },
