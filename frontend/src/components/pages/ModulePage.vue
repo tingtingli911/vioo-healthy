@@ -46,9 +46,9 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Sparkles, Scale, Droplets, ClipboardList, ArrowLeft } from 'lucide-vue-next'
+import { Dumbbell, Scale, Droplets, ClipboardList, ArrowLeft } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
-import AiModule from '@/components/modules/AiModule.vue'
+import ExerciseModule from '@/components/modules/ExerciseModule.vue'
 import WeightModule from '@/components/modules/WeightModule.vue'
 import GlucoseModule from '@/components/modules/GlucoseModule.vue'
 import ReportModule from '@/components/modules/ReportModule.vue'
@@ -63,10 +63,10 @@ const props = defineProps({
 defineEmits(['back'])
 
 const moduleConfig = {
-  ai: {
-    icon: Sparkles,
-    title: "智能健康管理",
-    description: "综合分析您的健康数据，提供个性化的日常建议和健康方案",
+  exercise: {
+    icon: Dumbbell,
+    title: "运动管理",
+    description: "记录运动数据，追踪运动时长，科学管理运动目标",
     color: "bg-primary/10 text-primary",
     gradient: "from-primary/20 to-primary/5",
   },
@@ -94,16 +94,16 @@ const moduleConfig = {
 }
 
 const config = computed(() => {
-  return moduleConfig[props.moduleId] || moduleConfig.ai
+  return moduleConfig[props.moduleId] || moduleConfig.exercise
 })
 
 const moduleComponent = computed(() => {
   const components = {
-    ai: AiModule,
+    exercise: ExerciseModule,
     weight: WeightModule,
     glucose: GlucoseModule,
     report: ReportModule,
   }
-  return components[props.moduleId] || AiModule
+  return components[props.moduleId] || ExerciseModule
 })
 </script>

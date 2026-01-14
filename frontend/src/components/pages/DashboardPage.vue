@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <!-- AI Suggestions Card -->
+        <!-- AI Chat Dialog -->
         <div class="mb-10 p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
@@ -74,29 +74,46 @@
             </div>
             <div>
               <h3 class="font-semibold text-foreground">AI 健康助手</h3>
-              <p class="text-sm text-muted-foreground">今日健康建议</p>
+              <p class="text-sm text-muted-foreground">智能健康咨询</p>
             </div>
           </div>
-          <div class="space-y-3">
+          
+          <!-- Chat Messages -->
+          <div class="space-y-3 mb-4 max-h-64 overflow-y-auto">
             <div
-              v-for="(suggestion, index) in aiSuggestions"
+              v-for="(msg, index) in chatMessages"
               :key="index"
-              class="flex items-start gap-3 p-3 rounded-xl bg-background/60 backdrop-blur"
+              :class="[
+                'flex',
+                msg.role === 'user' ? 'justify-end' : 'justify-start'
+              ]"
             >
-              <div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span class="text-xs font-medium text-primary">{{ index + 1 }}</span>
+              <div
+                :class="[
+                  'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
+                  msg.role === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-br-md'
+                    : 'bg-background/80 backdrop-blur text-foreground rounded-bl-md'
+                ]"
+              >
+                <p class="whitespace-pre-line leading-relaxed">{{ msg.content }}</p>
               </div>
-              <p class="text-sm text-foreground leading-relaxed">{{ suggestion }}</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            class="mt-4 text-primary hover:text-primary gap-1"
-            @click="$emit('navigate', 'ai')"
-          >
-            查看更多建议
-            <ArrowRight class="w-4 h-4" />
-          </Button>
+          
+          <!-- Input -->
+          <div class="flex gap-2">
+            <input
+              v-model="chatInput"
+              type="text"
+              placeholder="询问健康相关问题..."
+              class="flex-1 h-12 px-4 rounded-xl bg-background/60 backdrop-blur border-0 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              @keyup.enter="sendChatMessage"
+            />
+            <Button size="icon" class="h-12 w-12 rounded-xl" @click="sendChatMessage">
+              <ArrowRight class="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         <!-- Module Cards -->
@@ -160,17 +177,18 @@
 </template>
 
 <script setup>
-import { Sparkles, Scale, Droplets, ClipboardList, ArrowRight, Plus, Bell, Settings, LogOut, TrendingUp, TrendingDown, Minus, ChevronRight } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { Sparkles, Scale, Droplets, ClipboardList, ArrowRight, Plus, Bell, Settings, LogOut, TrendingUp, TrendingDown, Minus, ChevronRight, Dumbbell } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
 defineEmits(['navigate', 'logout'])
 
 const modules = [
   {
-    id: "ai",
-    icon: Sparkles,
-    title: "智能健康",
-    subtitle: "AI 分析与建议",
+    id: "exercise",
+    icon: Dumbbell,
+    title: "运动管理",
+    subtitle: "运动记录与分析",
     color: "from-primary to-primary/70",
     bgColor: "bg-primary/10",
     textColor: "text-primary",
@@ -211,11 +229,34 @@ const healthMetrics = [
   { label: "健康评分", value: "86", unit: "分", trend: "up", change: "+2" },
 ]
 
-const aiSuggestions = [
-  "今日建议适量运动30分钟，有助于保持体重稳定",
-  "您的空腹血糖在正常范围，继续保持良好的饮食习惯",
-  "距离下次体检还有45天，建议提前预约",
-]
+const chatInput = ref('')
+const chatMessages = ref([
+  {
+    role: 'assistant',
+    content: '您好！我是vioo智能健康助手。基于您最近的健康数据，我为您提供以下建议：\n\n1. 今日建议适量运动30分钟，有助于保持体重稳定\n2. 您的空腹血糖在正常范围，继续保持良好的饮食习惯\n3. 距离下次体检还有45天，建议提前预约\n\n您想了解哪方面的建议？'
+  }
+])
+
+const sendChatMessage = () => {
+  if (!chatInput.value.trim()) return
+  
+  // 添加用户消息
+  chatMessages.value.push({
+    role: 'user',
+    content: chatInput.value
+  })
+  
+  // TODO: 实现AI回复逻辑
+  // 暂时添加一个占位回复
+  setTimeout(() => {
+    chatMessages.value.push({
+      role: 'assistant',
+      content: '感谢您的提问！AI回复功能正在开发中，敬请期待。'
+    })
+  }, 500)
+  
+  chatInput.value = ''
+}
 
 const getTrendIcon = (trend) => {
   switch (trend) {

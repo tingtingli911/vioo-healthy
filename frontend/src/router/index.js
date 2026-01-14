@@ -32,10 +32,10 @@ const routes = [
     meta: { moduleId: 'glucose' }
   },
   {
-    path: '/ai',
-    name: 'AI',
+    path: '/exercise',
+    name: 'Exercise',
     component: Index,
-    meta: { moduleId: 'ai' }
+    meta: { moduleId: 'exercise' }
   },
   {
     path: '/report',
@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const publicPages = ['/', '/login', '/register']
   const isPublicPage = publicPages.includes(to.path)
-  const protectedPages = ['/weight', '/glucose', '/ai', '/report']
+  const protectedPages = ['/weight', '/glucose', '/exercise', '/report']
 
   if (token && (to.path === '/login' || to.path === '/register')) {
     // 已登录但访问登录/注册页，跳转到首页

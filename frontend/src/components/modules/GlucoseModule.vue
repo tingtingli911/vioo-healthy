@@ -54,65 +54,84 @@
     <!-- Chart -->
     <div class="health-card">
       <h3 class="text-sm font-medium text-foreground mb-4">今日血糖曲线</h3>
-      <div class="h-52">
-        <template v-if="isMounted">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart :data="glucoseData">
-              <defs>
-                <linearGradient id="glucoseGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0.3"/>
-                  <stop offset="95%" :stopColor="'hsl(var(--health-glucose))'" :stopOpacity="0"/>
-                </linearGradient>
-              </defs>
-              <XAxis 
-                dataKey="time" 
-                :axisLine="false"
-                :tickLine="false"
-                :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
-              />
-              <YAxis 
-                :domain="[4, 12]"
-                :axisLine="false"
-                :tickLine="false"
-                :tick="{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }"
-                :width="30"
-              />
-              <Tooltip 
-                :contentStyle="{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                }"
-                :formatter="(value) => [`${value} mmol/L`, '血糖']"
-              />
-              <ReferenceLine 
-                :y="7.8" 
-                :stroke="'hsl(var(--health-glucose))'" 
-                strokeDasharray="3 3" 
-                :strokeOpacity="0.5"
-              />
-              <ReferenceLine 
-                :y="6.1" 
-                :stroke="'hsl(var(--health-ai))'" 
-                strokeDasharray="3 3" 
-                :strokeOpacity="0.5"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                :stroke="'hsl(var(--health-glucose))'"
-                :strokeWidth="2.5"
-                fill="url(#glucoseGradient)"
-                :dot="{ fill: 'hsl(var(--health-glucose))', strokeWidth: 0, r: 4 }"
-                :activeDot="{ r: 6, fill: 'hsl(var(--health-glucose))' }"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </template>
-        <div v-else class="h-full flex items-center justify-center text-muted-foreground">
-          加载中...
-        </div>
+      <div class="h-52 relative">
+        <svg viewBox="0 0 400 220" class="w-full h-full" preserveAspectRatio="none">
+          <!-- 渐变定义 -->
+          <defs>
+            <linearGradient id="glucoseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="5%" :stop-color="'hsl(var(--health-glucose))'" stop-opacity="0.3" />
+              <stop offset="95%" :stop-color="'hsl(var(--health-glucose))'" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Y轴网格线 -->
+          <line v-for="i in 4" :key="`grid-y-${i}`" 
+            :x1="0" :y1="i * 50" :x2="400" :y2="i * 50"
+            stroke="hsl(var(--border))" stroke-width="0.5" opacity="0.3" />
+          
+          <!-- 参考线：餐后上限 7.8 -->
+          <line 
+            x1="0" 
+            :y1="((12 - 7.8) / (12 - 4)) * 200" 
+            x2="400" 
+            :y2="((12 - 7.8) / (12 - 4)) * 200"
+            :stroke="'hsl(var(--health-glucose))'"
+            stroke-dasharray="3 3"
+            stroke-opacity="0.5"
+            stroke-width="1"
+          />
+          
+          <!-- 参考线：空腹上限 6.1 -->
+          <line 
+            x1="0" 
+            :y1="((12 - 6.1) / (12 - 4)) * 200" 
+            x2="400" 
+            :y2="((12 - 6.1) / (12 - 4)) * 200"
+            :stroke="'hsl(var(--health-ai))'"
+            stroke-dasharray="3 3"
+            stroke-opacity="0.5"
+            stroke-width="1"
+          />
+          
+          <!-- 数据区域 -->
+          <polygon 
+            :points="chartAreaPoints" 
+            fill="url(#glucoseGradient)" 
+          />
+          
+          <!-- 数据线 -->
+          <polyline 
+            :points="chartLinePoints"
+            fill="none"
+            :stroke="'hsl(var(--health-glucose))'"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          
+          <!-- 数据点 -->
+          <circle 
+            v-for="(point, index) in chartPoints" 
+            :key="`point-${index}`"
+            :cx="point.x" 
+            :cy="point.y" 
+            r="4"
+            :fill="'hsl(var(--health-glucose))'"
+          />
+          
+          <!-- X轴标签 -->
+          <text 
+            v-for="(item, index) in glucoseData" 
+            :key="`label-${index}`"
+            :x="(index / (glucoseData.length - 1)) * 400" 
+            y="215"
+            :fill="'hsl(var(--muted-foreground))'"
+            font-size="10"
+            text-anchor="middle"
+          >
+            {{ item.time }}
+          </text>
+        </svg>
       </div>
       <div class="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
         <div class="flex items-center gap-1">
@@ -153,51 +172,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, defineAsyncComponent } from 'vue'
+import { computed, ref } from 'vue'
 import { Plus, Droplets, Clock } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
 const showAddDialog = ref(false)
-const isMounted = ref(false)
-
-// 动态导入 recharts 组件
-const AreaChart = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.AreaChart
-})
-const Area = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.Area
-})
-const XAxis = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.XAxis
-})
-const YAxis = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.YAxis
-})
-const ResponsiveContainer = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.ResponsiveContainer
-})
-const Tooltip = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.Tooltip
-})
-const ReferenceLine = defineAsyncComponent(async () => {
-  const recharts = await import('recharts')
-  return recharts.ReferenceLine
-})
-
-onMounted(async () => {
-  await nextTick()
-  // 延迟确保 DOM 完全渲染
-  await new Promise(resolve => setTimeout(resolve, 200))
-  requestAnimationFrame(() => {
-    isMounted.value = true
-  })
-})
 
 const glucoseData = [
   { time: "6:00", value: 5.2, type: "空腹" },
@@ -213,4 +192,30 @@ const stats = [
   { label: "餐后血糖", value: "8.4", unit: "mmol/L", status: "偏高" },
   { label: "日均血糖", value: "7.2", unit: "mmol/L", status: "良好" },
 ]
+
+// 计算图表数据点
+const chartPoints = computed(() => {
+  const min = 4
+  const max = 12
+  const range = max - min
+  
+  return glucoseData.map((item, index) => ({
+    x: (index / (glucoseData.length - 1)) * 400,
+    y: 200 - ((item.value - min) / range) * 200,
+    value: item.value
+  }))
+})
+
+// 生成折线路径点
+const chartLinePoints = computed(() => {
+  return chartPoints.value.map(p => `${p.x},${p.y}`).join(' ')
+})
+
+// 生成区域路径点（用于填充）
+const chartAreaPoints = computed(() => {
+  const points = chartPoints.value
+  const firstX = points[0].x
+  const lastX = points[points.length - 1].x
+  return `${firstX},200 ${points.map(p => `${p.x},${p.y}`).join(' ')} ${lastX},200`
+})
 </script>

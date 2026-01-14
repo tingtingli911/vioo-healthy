@@ -44,8 +44,8 @@ const setActiveTabFromRoute = () => {
     activeTab.value = 'weight'
   } else if (path === '/glucose') {
     activeTab.value = 'glucose'
-  } else if (path === '/ai') {
-    activeTab.value = 'ai'
+  } else if (path === '/exercise') {
+    activeTab.value = 'exercise'
   } else if (path === '/report') {
     activeTab.value = 'report'
   } else {
@@ -59,7 +59,7 @@ const handleNavigate = (tab) => {
     'dashboard': '/',
     'weight': '/weight',
     'glucose': '/glucose',
-    'ai': '/ai',
+    'exercise': '/exercise',
     'report': '/report'
   }
   const targetPath = routeMap[tab] || '/'

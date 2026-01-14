@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-foreground">体重管理</h1>
-        <p class="text-sm text-muted-foreground mt-1">追踪您的体重变化趋势</p>
+        <h1 class="text-2xl font-bold text-foreground">运动管理</h1>
+        <p class="text-sm text-muted-foreground mt-1">记录和管理您的运动数据</p>
       </div>
       <Button class="gap-2 rounded-xl" @click="showAddDialog = true">
         <Plus class="w-4 h-4" />
@@ -19,7 +19,7 @@
         :key="stat.label"
         class="health-card text-center"
       >
-        <component :is="stat.icon" class="w-5 h-5 text-health-weight mx-auto mb-2" />
+        <component :is="stat.icon" class="w-5 h-5 text-primary mx-auto mb-2" />
         <p class="stat-number text-xl font-semibold text-foreground">
           {{ stat.value }}
           <span class="text-xs text-muted-foreground ml-0.5">{{ stat.unit }}</span>
@@ -30,14 +30,14 @@
 
     <!-- Chart -->
     <div class="health-card">
-      <h3 class="text-sm font-medium text-foreground mb-4">近7天趋势</h3>
+      <h3 class="text-sm font-medium text-foreground mb-4">本周运动时长</h3>
       <div class="h-48 relative">
         <svg viewBox="0 0 400 200" class="w-full h-full" preserveAspectRatio="none">
           <!-- 背景网格线 -->
           <defs>
-            <linearGradient id="weightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" :stop-color="'hsl(var(--health-weight))'" stop-opacity="0.2" />
-              <stop offset="100%" :stop-color="'hsl(var(--health-weight))'" stop-opacity="0" />
+            <linearGradient id="exerciseGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" :stop-color="'hsl(var(--primary))'" stop-opacity="0.2" />
+              <stop offset="100%" :stop-color="'hsl(var(--primary))'" stop-opacity="0" />
             </linearGradient>
           </defs>
           
@@ -49,7 +49,7 @@
           <!-- 数据区域 -->
           <polygon 
             :points="chartAreaPoints" 
-            fill="url(#weightGradient)" 
+            fill="url(#exerciseGradient)" 
             opacity="0.6"
           />
           
@@ -57,7 +57,7 @@
           <polyline 
             :points="chartLinePoints"
             fill="none"
-            :stroke="'hsl(var(--health-weight))'"
+            :stroke="'hsl(var(--primary))'"
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -70,20 +70,20 @@
             :cx="point.x" 
             :cy="point.y" 
             r="4"
-            :fill="'hsl(var(--health-weight))'"
+            :fill="'hsl(var(--primary))'"
           />
           
           <!-- X轴标签 -->
           <text 
-            v-for="(item, index) in weightData" 
+            v-for="(item, index) in exerciseData" 
             :key="`label-${index}`"
-            :x="(index / (weightData.length - 1)) * 400" 
+            :x="(index / (exerciseData.length - 1)) * 400" 
             y="195"
             :fill="'hsl(var(--muted-foreground))'"
             font-size="11"
             text-anchor="middle"
           >
-            {{ item.date }}
+            {{ item.day }}
           </text>
         </svg>
       </div>
@@ -97,9 +97,15 @@
         :key="index"
         class="health-card flex items-center justify-between py-3"
       >
-        <span class="text-sm text-muted-foreground">{{ record.date }}</span>
+        <div class="flex items-center gap-3">
+          <component :is="record.icon" class="w-5 h-5 text-primary" />
+          <div>
+            <span class="text-sm font-medium text-foreground">{{ record.type }}</span>
+            <span class="text-xs text-muted-foreground ml-2">{{ record.date }}</span>
+          </div>
+        </div>
         <span class="stat-number text-lg font-medium text-foreground">
-          {{ record.weight }} <span class="text-xs text-muted-foreground">kg</span>
+          {{ record.duration }} <span class="text-xs text-muted-foreground">分钟</span>
         </span>
       </div>
     </div>
@@ -108,42 +114,47 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { Plus, TrendingDown, Target, Calendar } from 'lucide-vue-next'
+import { Plus, Activity, Calendar, Target } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
 const showAddDialog = ref(false)
 
-const weightData = [
-  { date: "1/7", weight: 68.5 },
-  { date: "1/8", weight: 68.3 },
-  { date: "1/9", weight: 68.4 },
-  { date: "1/10", weight: 68.1 },
-  { date: "1/11", weight: 67.9 },
-  { date: "1/12", weight: 67.8 },
-  { date: "1/13", weight: 67.6 },
+const exerciseData = [
+  { day: "周一", duration: 30 },
+  { day: "周二", duration: 45 },
+  { day: "周三", duration: 25 },
+  { day: "周四", duration: 50 },
+  { day: "周五", duration: 35 },
+  { day: "周六", duration: 60 },
+  { day: "周日", duration: 40 },
 ]
 
 const stats = [
-  { label: "当前体重", value: "67.6", unit: "kg", icon: TrendingDown },
-  { label: "目标体重", value: "65.0", unit: "kg", icon: Target },
-  { label: "已记录", value: "28", unit: "天", icon: Calendar },
+  { label: "本周总时长", value: "285", unit: "分钟", icon: Activity },
+  { label: "本周目标", value: "300", unit: "分钟", icon: Target },
+  { label: "已记录", value: "7", unit: "天", icon: Calendar },
 ]
 
 const recentRecords = computed(() => {
-  return [...weightData].reverse().slice(0, 5)
+  return exerciseData.slice().reverse().slice(0, 5).map(item => ({
+    type: "有氧运动",
+    date: item.day,
+    duration: item.duration,
+    icon: Activity
+  }))
 })
 
 // 计算图表数据点
 const chartPoints = computed(() => {
-  const values = weightData.map(d => d.weight)
-  const min = Math.min(...values) - 0.5
-  const max = Math.max(...values) + 0.5
+  const values = exerciseData.map(d => d.duration)
+  const min = 0
+  const max = Math.max(...values) + 10
   const range = max - min
   
-  return weightData.map((item, index) => ({
-    x: (index / (weightData.length - 1)) * 400,
-    y: 200 - ((item.weight - min) / range) * 180,
-    value: item.weight
+  return exerciseData.map((item, index) => ({
+    x: (index / (exerciseData.length - 1)) * 400,
+    y: 200 - ((item.duration - min) / range) * 180,
+    value: item.duration
   }))
 })
 
