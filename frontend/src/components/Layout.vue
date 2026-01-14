@@ -3,10 +3,19 @@
     <el-container>
       <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px' : '200px'" class="sidebar">
+        <!-- Logo 区域 -->
         <div class="logo">
           <span v-if="!isCollapse" class="logo-text">VIOO</span>
           <span v-else class="logo-icon">V</span>
+          <el-button
+            :icon="isCollapse ? Expand : Fold"
+            @click="toggleCollapse"
+            text
+            class="collapse-btn"
+          />
         </div>
+
+        <!-- 导航菜单 -->
         <el-menu
           :default-active="activeMenu"
           :collapse="isCollapse"
@@ -35,40 +44,51 @@
             <template #title>AI 智能推荐</template>
           </el-menu-item>
         </el-menu>
-      </el-aside>
 
-      <!-- 主内容区 -->
-      <el-container>
-        <!-- 顶部栏 -->
-        <el-header class="header">
-          <div class="header-left">
-            <el-button
-              :icon="isCollapse ? Expand : Fold"
-              @click="toggleCollapse"
-              text
-              class="collapse-btn"
-            />
-          </div>
-          <div class="header-right">
-            <div class="user-info" v-if="user">
-              <el-text>欢迎，{{ user.username }}</el-text>
-              <el-tag v-if="user.is_superuser" type="warning" effect="dark" size="small">
-                <el-icon><Star /></el-icon>
-                超级管理员
-              </el-tag>
-              <el-button type="danger" plain size="small" @click="handleLogout">
-                <el-icon><SwitchButton /></el-icon>
+        <!-- 用户信息区域（底部） -->
+        <div class="user-section" v-if="user">
+          <el-popover
+            placement="right"
+            trigger="hover"
+            popper-class="user-popover"
+            :show-arrow="false"
+          >
+            <template #reference>
+              <div class="user-info">
+                <el-avatar :size="40" class="user-avatar">
+                  <el-icon><User /></el-icon>
+                </el-avatar>
+                <div v-if="!isCollapse" class="user-details">
+                  <div class="user-name">{{ user.username }}</div>
+                </div>
+              </div>
+            </template>
+
+            <div class="user-popover-content">
+              <div class="user-popover-name">{{ user.username }}</div>
+              <el-button
+                text
+                class="user-popover-item"
+                @click="handleEditProfile"
+              >
+                编辑个人信息
+              </el-button>
+              <el-button
+                text
+                class="user-popover-item user-popover-logout"
+                @click="handleLogout"
+              >
                 退出登录
               </el-button>
             </div>
-          </div>
-        </el-header>
+          </el-popover>
+        </div>
+      </el-aside>
 
-        <!-- 内容区域 -->
-        <el-main class="main-content">
-          <router-view />
-        </el-main>
-      </el-container>
+      <!-- 主内容区 -->
+      <el-main class="main-content">
+        <router-view />
+      </el-main>
     </el-container>
   </div>
 </template>
@@ -83,7 +103,7 @@ import {
   Document,
   Files,
   MagicStick,
-  Star,
+  User,
   SwitchButton,
   Fold,
   Expand
@@ -96,7 +116,7 @@ export default {
     Document,
     Files,
     MagicStick,
-    Star,
+    User,
     SwitchButton,
     Fold,
     Expand
@@ -140,6 +160,11 @@ export default {
       }
     }
 
+    const handleEditProfile = () => {
+      // 个人信息编辑功能占位：后续可以跳转到个人中心页
+      ElMessage.info('个人信息编辑功能开发中，敬请期待')
+    }
+
     onMounted(() => {
       loadUserInfo()
     })
@@ -150,6 +175,7 @@ export default {
       activeMenu,
       toggleCollapse,
       handleLogout,
+      handleEditProfile,
       Fold,
       Expand
     }
@@ -167,13 +193,17 @@ export default {
   background: #fff;
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
   transition: width 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .logo {
   height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 0 16px;
   background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-gradient-end) 100%);
   color: white;
   font-weight: 600;
@@ -189,50 +219,103 @@ export default {
   font-size: 28px;
 }
 
+.collapse-btn {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+}
+
+.collapse-btn:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .sidebar-menu {
   border-right: none;
-  height: calc(100vh - 60px);
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-menu:not(.el-menu--collapse) {
   width: 200px;
 }
 
-.header {
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 60px !important;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
-.collapse-btn {
-  font-size: 20px;
-  color: #666;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
+.user-section {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px;
+  background: #fafafa;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-gradient-end) 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-popover {
+  min-width: 160px;
+}
+
+.user-popover-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-popover-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.user-popover-item {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+.user-popover-item:hover {
+  background-color: transparent;
+  color: var(--el-color-primary);
+}
+
+.user-popover-logout {
+  color: #374151;
+}
+
+.user-popover-logout:hover {
+  color: #dc2626;
 }
 
 .main-content {
   padding: 20px;
   background: #f5f5f5;
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
+  overflow-y: auto;
 }
 </style>
